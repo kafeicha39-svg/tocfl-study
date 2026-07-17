@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d7b74">
+  <title>Day 1 | TOCFL Band B Study</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<nav class="lesson-nav">
+  <div class="container">
+    <a class="back-link" href="../index.html">← ホーム</a>
+    <strong>Day 1</strong>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="badge">Unit 1・Day 1</span>
+    <h1>今日の15分TOCFL</h1>
+    <p>テーマ：個人資料・人間関係・社会生活</p>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>今日の流れ</h2>
+    <p><strong style="color:var(--accent)">約15〜20分</strong>で終わります。</p>
+    <div class="grid">
+      <div>① 単語5語　8分</div>
+      <div>② ミニ読解　4分</div>
+      <div>③ クイズ　3分</div>
+    </div>
+    <div class="progress"><span id="lessonProgress"></span></div>
+    <p class="muted" id="lessonProgressText">進捗：0 / 7</p>
+  </section>
+
+  <div id="wordCards"></div>
+
+  <section class="card">
+    <span class="eyebrow">READING</span>
+    <h2>面對新環境</h2>
+    <div class="example">
+      <p id="readingText">小林大學畢業後，到一家外商公司工作。剛開始的時候，他不太習慣公司的文化，也不知道該怎麼跟同事相處。不過，同事們都很支持他，主管也根據他的能力安排工作。經過幾個月的努力，小林不但慢慢適應了新環境，也更有信心面對新的挑戰。</p>
+      <button class="speak" onclick="speakText(document.getElementById('readingText').innerText)">🔊 読解文を聞く</button>
+    </div>
+    <h3>小林剛開始工作的時候，遇到了什麼問題？</h3>
+    <button class="choice" onclick="answerReading(this,0)">A. 他不想工作</button>
+    <button class="choice" onclick="answerReading(this,1)">B. 他不習慣公司文化，也不知道怎麼跟同事相處</button>
+    <button class="choice" onclick="answerReading(this,2)">C. 同事們不支持他</button>
+    <button class="choice" onclick="answerReading(this,3)">D. 主管沒有安排工作</button>
+    <div id="readingAnswer" class="answer"></div>
+  </section>
+
+  <section class="card">
+    <span class="eyebrow">REVIEW</span>
+    <h2>復習クイズ3問</h2>
+    <div id="quiz"></div>
+  </section>
+
+  <section class="card">
+    <h2>今日の仕上げ</h2>
+    <p>次の文を3回音読しましょう。</p>
+    <div class="example">
+      <p><strong>每個人都要勇敢面對困難，也要學會跟別人相處。</strong></p>
+      <p class="pinyin">Měi ge rén dōu yào yǒnggǎn miànduì kùnnán, yě yào xuéhuì gēn biérén xiāngchǔ.</p>
+      <p class="jp">誰でも困難に勇敢に向き合い、他人とうまく付き合うことを学ばなければなりません。</p>
+      <button class="speak" onclick="speakText('每個人都要勇敢面對困難，也要學會跟別人相處。')">🔊 例文を聞く</button>
+    </div>
+    <button class="primary" onclick="completeLesson()">今日の学習を完了する</button>
+    <p id="completeMessage" class="muted"></p>
+  </section>
+</main>
+
+<footer>TOCFL Band B 学習サポート・オリジナル補助教材</footer>
+<script src="../assets/js/day1.js"></script>
+</body>
+</html>
