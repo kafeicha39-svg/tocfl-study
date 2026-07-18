@@ -11,8 +11,8 @@
 <header class="hero">
   <div class="container">
     <span class="badge">TOCFL Band B・11月末受験</span>
-    <h1>臺灣華語學習室</h1>
-    <p>毎日15〜20分。紙の問題集と連動して、無理なく続ける学習サイトです。</p>
+    <h1>台湾華語学習室</h1>
+    <p>毎日15〜20分。語彙・読解・音声を少しずつ積み重ねます。</p>
   </div>
 </header>
 
@@ -21,57 +21,54 @@
     <div class="section-head">
       <div>
         <span class="eyebrow">TODAY</span>
-        <h2>今日の15分レッスン</h2>
+        <h2>今日の18分レッスン</h2>
       </div>
       <span class="status" id="todayStatus">未完了</span>
     </div>
-    <p>Unit 1「個人資料・人間関係・社会生活」から、重要語彙5語を学びます。</p>
-    <a class="primary-button" href="lessons/day1.html">Day 1を始める</a>
+    <p>Day 1の復習から始めて、「組織とリーダーシップ」に関する新しい5語を学びます。</p>
+    <a class="primary-button" href="lessons/day2.html">Day 2を始める</a>
   </section>
 
-  <section class="grid">
+  <section class="grid lesson-grid">
     <article class="mini-card">
-      <div class="icon">📚</div>
-      <h3>問題集対応</h3>
-      <p>『華語文能力測驗 關鍵詞彙 高階篇』の重要語彙を中心に学習します。</p>
+      <span class="eyebrow">DAY 1</span>
+      <h3>人間関係・社会生活</h3>
+      <p>面對・相處・支持・根據・統計</p>
+      <a class="text-link" href="lessons/day1.html">復習する →</a>
+      <span class="status lesson-status" id="day1Status">未完了</span>
     </article>
     <article class="mini-card">
-      <div class="icon">🔊</div>
-      <h3>台湾華語の発音</h3>
-      <p>単語・例文・読解文を、端末の台湾華語音声で再生します。</p>
-    </article>
-    <article class="mini-card">
-      <div class="icon">✅</div>
-      <h3>学習記録</h3>
-      <p>進捗はこのブラウザに保存されます。ホーム画面から完了状況を確認できます。</p>
+      <span class="eyebrow">DAY 2</span>
+      <h3>組織とリーダーシップ</h3>
+      <p>團體・組織・服從・領導・權力</p>
+      <a class="text-link" href="lessons/day2.html">学習する →</a>
+      <span class="status lesson-status" id="day2Status">未完了</span>
     </article>
   </section>
 
   <section class="card">
     <span class="eyebrow">PROGRESS</span>
     <h2>現在の学習状況</h2>
-    <div class="progress">
+    <div class="progress" aria-label="全体の学習進捗">
       <span id="homeProgress"></span>
     </div>
-    <p id="progressText" class="muted">Day 1：未完了</p>
+    <p id="progressText" class="muted">0 / 2日完了</p>
   </section>
 
   <section class="card">
-    <span class="eyebrow">NEXT</span>
-    <h2>今後追加する機能</h2>
+    <span class="eyebrow">COMING NEXT</span>
+    <h2>段階的に追加する機能</h2>
     <div class="feature-list">
-      <span>翌日の復習</span>
+      <span>前日の復習</span>
       <span>苦手単語</span>
-      <span>読解練習</span>
+      <span>文法</span>
+      <span>読解・リスニング</span>
       <span>模試モード</span>
-      <span>学習カレンダー</span>
     </div>
   </section>
 </main>
 
-<footer>
-  TOCFL Band B 学習サポート
-</footer>
+<footer>TOCFL Band B 学習サポート</footer>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

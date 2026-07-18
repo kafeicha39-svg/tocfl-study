@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d7b74">
+  <title>Day 2 | TOCFL Band B Study</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<nav class="lesson-nav">
+  <div class="container">
+    <a class="back-link" href="../index.html">← ホーム</a>
+    <strong>Day 2</strong>
+    <a class="back-link" href="day1.html">Day 1</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="badge">Unit 1・Day 2</span>
+    <h1>今日の18分TOCFL</h1>
+    <p>テーマ：組織とリーダーシップ</p>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>今日の流れ</h2>
+    <div class="grid time-guide">
+      <div><strong>① 前日の復習</strong><br>3分</div>
+      <div><strong>② 新しい単語5語</strong><br>10分</div>
+      <div><strong>③ ミニ読解・クイズ</strong><br>5分</div>
+    </div>
+    <div class="progress" aria-label="Day 2の学習進捗"><span id="lessonProgress"></span></div>
+    <p class="muted" id="lessonProgressText">進捗：0 / 8</p>
+  </section>
+
+  <section class="card">
+    <span class="eyebrow">3-MINUTE REVIEW</span>
+    <h2>Day 1の復習</h2>
+    <p>昨日の5語から3問です。迷っても、まず答えて記憶を呼び戻しましょう。</p>
+    <div id="reviewQuiz"></div>
+  </section>
+
+  <div id="wordCards"></div>
+
+  <section class="card">
+    <span class="eyebrow">READING</span>
+    <h2>ミニ読解：社區環保組織</h2>
+    <div class="example">
+      <p id="readingText" lang="zh-Hant"><strong>某個社區團體最近成立了一個環保組織。負責人小林很會領導成員，但他認為領導者不能只靠權力要求大家服從。每次規劃活動時，他都會先聽取成員的意見，再一起做決定。因此，這個組織的成員不但合作順利，也很願意繼續參加活動。</strong></p>
+      <p class="pinyin">Mǒu ge shèqū tuántǐ zuìjìn chénglì le yí ge huánbǎo zǔzhī. Fùzérén Xiǎolín hěn huì lǐngdǎo chéngyuán, dàn tā rènwéi lǐngdǎozhě bùnéng zhǐ kào quánlì yāoqiú dàjiā fúcóng. Měi cì guīhuà huódòng shí, tā dōu huì xiān tīngqǔ chéngyuán de yìjiàn, zài yìqǐ zuò juédìng. Yīncǐ, zhège zǔzhī de chéngyuán búdàn hézuò shùnlì, yě hěn yuànyì jìxù cānjiā huódòng.</p>
+      <p class="jp">ある地域団体が最近、環境保護組織を設立しました。責任者の林さんはメンバーをまとめるのが上手ですが、リーダーは権力だけで皆に従うよう求めてはいけないと考えています。活動を計画するたびに、まずメンバーの意見を聞き、その後で一緒に決定します。そのため、この組織のメンバーは協力が順調なだけでなく、今後も活動に参加したいと思っています。</p>
+      <button type="button" class="speak" onclick="speakText(document.getElementById('readingText').innerText)">🔊 読解文を聞く</button>
+    </div>
+    <h3>小林の考えに最も近いものはどれですか。</h3>
+    <button type="button" class="choice" onclick="answerReading(this,0)">A. リーダーは権力を使って命令するべきだ。</button>
+    <button type="button" class="choice" onclick="answerReading(this,1)">B. メンバーはどんな命令にも従うべきだ。</button>
+    <button type="button" class="choice" onclick="answerReading(this,2)">C. リーダーは決定前にメンバーの意見を聞くべきだ。</button>
+    <button type="button" class="choice" onclick="answerReading(this,3)">D. 環境保護組織は活動を計画する必要がない。</button>
+    <div id="readingAnswer" class="answer"></div>
+  </section>
+
+  <section class="card">
+    <span class="eyebrow">QUIZ</span>
+    <h2>新出単語クイズ3問</h2>
+    <div id="quiz"></div>
+  </section>
+
+  <section class="card">
+    <span class="eyebrow">FINISH</span>
+    <h2>今日の仕上げ</h2>
+    <p>次の文を3回、音声に続いて読みましょう。</p>
+    <div class="example">
+      <p lang="zh-Hant"><strong>一個好的領導者不會濫用權力，而是會聽取團體成員的意見。</strong></p>
+      <p class="pinyin">Yí ge hǎo de lǐngdǎozhě bú huì lànyòng quánlì, érshì huì tīngqǔ tuántǐ chéngyuán de yìjiàn.</p>
+      <p class="jp">よいリーダーは権力を乱用せず、団体メンバーの意見を聞きます。</p>
+      <button type="button" class="speak" onclick="speakText('一個好的領導者不會濫用權力，而是會聽取團體成員的意見。')">🔊 仕上げ文を聞く</button>
+    </div>
+    <button type="button" class="primary" onclick="completeLesson()">今日の学習を完了する</button>
+    <p id="completeMessage" class="muted" aria-live="polite"></p>
+  </section>
+</main>
+
+<footer>TOCFL Band B 学習サポート・オリジナル補助教材</footer>
+<script src="../assets/js/day2.js"></script>
+</body>
+</html>

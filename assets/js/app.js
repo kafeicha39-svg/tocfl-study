@@ -1,14 +1,25 @@
-
 (function(){
-  const complete = localStorage.getItem('tocfl_day1_complete') === '1';
-  const status = document.getElementById('todayStatus');
+  const days = [1, 2];
+  const completedDays = days.filter(day => localStorage.getItem(`tocfl_day${day}_complete`) === '1');
+  const day2Complete = completedDays.includes(2);
+  const todayStatus = document.getElementById('todayStatus');
   const bar = document.getElementById('homeProgress');
   const text = document.getElementById('progressText');
 
-  if(status){
-    status.textContent = complete ? '完了' : '未完了';
-    status.classList.toggle('done', complete);
+  if(todayStatus){
+    todayStatus.textContent = day2Complete ? '完了' : '未完了';
+    todayStatus.classList.toggle('done', day2Complete);
   }
-  if(bar) bar.style.width = complete ? '100%' : '0%';
-  if(text) text.textContent = complete ? 'Day 1：完了しました' : 'Day 1：未完了';
+
+  days.forEach(day => {
+    const status = document.getElementById(`day${day}Status`);
+    const complete = completedDays.includes(day);
+    if(status){
+      status.textContent = complete ? '完了' : '未完了';
+      status.classList.toggle('done', complete);
+    }
+  });
+
+  if(bar) bar.style.width = `${completedDays.length / days.length * 100}%`;
+  if(text) text.textContent = `${completedDays.length} / ${days.length}日完了`;
 })();

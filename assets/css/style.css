@@ -85,6 +85,11 @@ h3{margin:.25rem 0 .4rem}
   gap:14px;
   margin-bottom:16px;
 }
+.lesson-grid{grid-template-columns:repeat(2,1fr)}
+.lesson-grid .mini-card{position:relative;padding-bottom:54px}
+.lesson-status{position:absolute;right:18px;bottom:17px}
+.text-link{color:var(--primary);font-weight:800;text-decoration:none}
+.text-link:hover{text-decoration:underline}
 .icon{font-size:1.7rem}
 .muted{color:var(--muted)}
 .progress{
@@ -128,7 +133,24 @@ h3{margin:.25rem 0 .4rem}
   margin:.25rem 0 0;
 }
 .pinyin{color:var(--primary);font-weight:800}
+.choice-pinyin{display:inline-block;margin-left:.35rem;color:var(--primary);font-weight:800}
 .jp{color:var(--muted)}
+.word-type{
+  display:inline-block;
+  margin-left:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:#f1f4f3;
+  color:var(--muted);
+  font-size:.8rem;
+  font-weight:800;
+}
+.sense{
+  margin:10px 0;
+  padding:11px 13px;
+  border-radius:12px;
+  background:var(--soft);
+}
 .speak{
   border:0;
   border-radius:999px;
@@ -160,6 +182,7 @@ h3{margin:.25rem 0 .4rem}
   cursor:pointer;
 }
 .choice:hover{background:#faf7f3}
+.choice:disabled{cursor:default;color:var(--ink);opacity:1}
 .correct{background:#e6f5ee!important;border-color:#56a27b!important}
 .wrong{background:#fdebea!important;border-color:#cb6359!important}
 .answer{
@@ -182,7 +205,7 @@ button.primary{
 }
 footer{text-align:center;color:var(--muted);padding:10px 16px 28px}
 @media(max-width:720px){
-  .grid{grid-template-columns:1fr}
+  .grid,.lesson-grid{grid-template-columns:1fr}
   .card{padding:17px}
   .word{font-size:1.65rem}
 }
