@@ -1,4 +1,5 @@
 (function(){
+  const progressStorage = window.tocflProgressStorage || localStorage;
   const lessons = window.TOCFL_COURSE?.lessons || [];
   const requestedDay = Number(document.body.dataset.day || new URLSearchParams(location.search).get('day'));
   const lesson = lessons.find(item => item.day === requestedDay);
@@ -98,17 +99,17 @@
   }
 
   function mark(type, index = ''){
-    localStorage.setItem(key(type, index), '1');
+    progressStorage.setItem(key(type, index), '1');
     updateProgress();
   }
 
   function updateProgress(){
     let count = 0;
     lesson.words.forEach((_, index) => {
-      if(localStorage.getItem(key('word_', index))) count++;
+      if(progressStorage.getItem(key('word_', index))) count++;
     });
     ['review', 'listening', 'quiz'].forEach(type => {
-      if(localStorage.getItem(key(type))) count++;
+      if(progressStorage.getItem(key(type))) count++;
     });
     document.getElementById('lessonProgress').style.width = `${count / totalSteps * 100}%`;
     document.getElementById('lessonProgressText').textContent = `進捗：${count} / ${totalSteps}`;
@@ -137,7 +138,7 @@
       </section>`).join('');
 
     lesson.words.forEach((_, index) => {
-      if(localStorage.getItem(key('word_', index))){
+      if(progressStorage.getItem(key('word_', index))){
         document.getElementById(`wordCard${index}`).classList.add('done-card');
       }
     });
@@ -256,7 +257,7 @@
   };
 
   window.completeLesson = function(){
-    localStorage.setItem(completeKey, '1');
+    progressStorage.setItem(completeKey, '1');
     document.getElementById('completeMessage').textContent = `○ Day ${lesson.day}を完了しました。ホーム画面にも保存されます。`;
   };
 
@@ -265,7 +266,9 @@
   renderListening();
   renderQuiz();
   updateProgress();
-  if(localStorage.getItem(completeKey)){
+  if(progressStorage.getItem(completeKey)){
     document.getElementById('completeMessage').textContent = `○ Day ${lesson.day}は完了済みです。`;
   }
+
+  window.addEventListener('tocfl-progress-updated', () => location.reload());
 })();

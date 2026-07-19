@@ -1,4 +1,6 @@
 
+const progressStorage = window.tocflProgressStorage || localStorage;
+
 const words = [
   {
     w:"面對", p:"miànduì", m:"向き合う・直面する",
@@ -48,15 +50,15 @@ function speakText(text){
 }
 
 function mark(key){
-  if(!localStorage.getItem(key)) localStorage.setItem(key,'1');
+  if(!progressStorage.getItem(key)) progressStorage.setItem(key,'1');
   updateProgress();
 }
 
 function updateProgress(){
   let count = 0;
-  for(let i=0;i<5;i++) if(localStorage.getItem('tocfl_day1_word_'+i)) count++;
-  if(localStorage.getItem('tocfl_day1_reading')) count++;
-  if(localStorage.getItem('tocfl_day1_quiz')) count++;
+  for(let i=0;i<5;i++) if(progressStorage.getItem('tocfl_day1_word_'+i)) count++;
+  if(progressStorage.getItem('tocfl_day1_reading')) count++;
+  if(progressStorage.getItem('tocfl_day1_quiz')) count++;
   document.getElementById('lessonProgress').style.width = `${count/7*100}%`;
   document.getElementById('lessonProgressText').textContent = `進捗：${count} / 7`;
 }
@@ -122,10 +124,12 @@ function answerQuiz(btn,i,j){
 }
 
 function completeLesson(){
-  localStorage.setItem('tocfl_day1_complete','1');
+  progressStorage.setItem('tocfl_day1_complete','1');
   document.getElementById('completeMessage').textContent = '✅ Day 1を完了しました。ホーム画面にも保存されます。';
 }
 
 renderWords();
 renderQuiz();
 updateProgress();
+
+window.addEventListener('tocfl-progress-updated', () => location.reload());

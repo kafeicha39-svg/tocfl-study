@@ -20,6 +20,36 @@ body{
   color:var(--ink);
   line-height:1.75;
 }
+.sync-bar{
+  background:#f0f8f6;
+  border-bottom:1px solid #cfe3de;
+  color:var(--ink);
+}
+.sync-bar-inner{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:7px 0;
+}
+.sync-status,.sync-user{
+  margin-left:7px;
+  color:var(--muted);
+  font-size:.88rem;
+}
+.sync-button{
+  flex:none;
+  border:1px solid #b8d8d0;
+  border-radius:999px;
+  padding:7px 12px;
+  background:white;
+  color:var(--primary-dark);
+  font-weight:800;
+  cursor:pointer;
+}
+.sync-button:hover{background:var(--soft)}
+.sync-button:disabled{cursor:wait;opacity:.65}
 a{color:inherit}
 .container{width:min(940px,calc(100% - 28px));margin:auto}
 .hero{
@@ -273,4 +303,6 @@ footer{text-align:center;color:var(--muted);padding:10px 16px 28px}
   .grid,.lesson-grid,.pattern-grid{grid-template-columns:1fr}
   .card{padding:17px}
   .word{font-size:1.65rem}
+  .sync-bar-inner{align-items:flex-start}
+  .sync-status,.sync-user{display:block;margin:0;font-size:.8rem;line-height:1.45}
 }

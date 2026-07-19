@@ -1,3 +1,5 @@
+const progressStorage = window.tocflProgressStorage || localStorage;
+
 const words = [
   {
     w: '團體', p: 'tuántǐ', m: '団体・集団', type: '名詞',
@@ -79,18 +81,18 @@ function speakText(text){
 }
 
 function mark(key){
-  if(!localStorage.getItem(key)) localStorage.setItem(key, '1');
+  if(!progressStorage.getItem(key)) progressStorage.setItem(key, '1');
   updateProgress();
 }
 
 function updateProgress(){
   let count = 0;
   for(let i = 0; i < 5; i++){
-    if(localStorage.getItem(`tocfl_day2_word_${i}`)) count++;
+    if(progressStorage.getItem(`tocfl_day2_word_${i}`)) count++;
   }
-  if(localStorage.getItem('tocfl_day2_review')) count++;
-  if(localStorage.getItem('tocfl_day2_reading')) count++;
-  if(localStorage.getItem('tocfl_day2_quiz')) count++;
+  if(progressStorage.getItem('tocfl_day2_review')) count++;
+  if(progressStorage.getItem('tocfl_day2_reading')) count++;
+  if(progressStorage.getItem('tocfl_day2_quiz')) count++;
   const progress = document.getElementById('lessonProgress');
   const progressText = document.getElementById('lessonProgressText');
   if(progress) progress.style.width = `${count / 8 * 100}%`;
@@ -118,7 +120,7 @@ function renderWords(){
   `).join('');
 
   words.forEach((_, index) => {
-    if(localStorage.getItem(`tocfl_day2_word_${index}`)){
+    if(progressStorage.getItem(`tocfl_day2_word_${index}`)){
       document.getElementById(`wordCard${index}`).classList.add('done-card');
     }
   });
@@ -216,7 +218,7 @@ function answerQuiz(button, index, optionIndex){
 }
 
 function completeLesson(){
-  localStorage.setItem('tocfl_day2_complete', '1');
+  progressStorage.setItem('tocfl_day2_complete', '1');
   document.getElementById('completeMessage').textContent = '○ Day 2を完了しました。ホーム画面にも保存されます。';
 }
 
@@ -224,3 +226,5 @@ renderReview();
 renderWords();
 renderQuiz();
 updateProgress();
+
+window.addEventListener('tocfl-progress-updated', () => location.reload());

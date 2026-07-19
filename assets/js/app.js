@@ -1,4 +1,5 @@
 (function(){
+  const progressStorage = window.tocflProgressStorage || localStorage;
   const lessons = window.TOCFL_COURSE?.lessons || [];
 
   const lessonHref = day => {
@@ -13,7 +14,7 @@
     : `tocfl_course_v2_day${day}_complete`;
 
   const completedDays = lessons
-    .filter(lesson => localStorage.getItem(completeKey(lesson.day)) === '1')
+    .filter(lesson => progressStorage.getItem(completeKey(lesson.day)) === '1')
     .map(lesson => lesson.day);
 
   const nextLesson = lessons.find(lesson => !completedDays.includes(lesson.day)) || lessons[lessons.length - 1];
@@ -81,4 +82,6 @@
 
   if(bar) bar.style.width = `${completedDays.length / lessons.length * 100}%`;
   if(text) text.textContent = `${completedDays.length} / ${lessons.length}日完了`;
+
+  window.addEventListener('tocfl-progress-updated', () => location.reload());
 })();
