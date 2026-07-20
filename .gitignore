@@ -5,3 +5,9 @@ Thumbs.db
 
 # Local-only files
 *.log
+.env
+.env.*
+!.env.example
+*firebase-adminsdk*.json
+service-account*.json
+firebase-debug.log

@@ -33,8 +33,10 @@ const database = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
-let stopCloudListener = null;
+let stopProgressListener = null;
+let stopStudyListener = null;
 let pendingWrite = Promise.resolve();
+let pendingStudyWrite = Promise.resolve();
 
 function collectLocalProgress(){
   const completed = {};
@@ -67,6 +69,39 @@ function progressReference(user){
   return doc(database, 'users', user.uid, 'progress', 'current');
 }
 
+function studyReference(user){
+  return doc(database, 'users', user.uid, 'study', 'current');
+}
+
+function studyStorage(){
+  return window.tocflStudyStorage;
+}
+
+function mergeStudyMaps(first = {}, second = {}){
+  const merged = {...first};
+  Object.entries(second).forEach(([id, entry]) => {
+    if(!merged[id] || Number(entry?.updatedAt || 0) > Number(merged[id]?.updatedAt || 0)){
+      merged[id] = entry;
+    }
+  });
+  return merged;
+}
+
+function sameStudyMap(first, second){
+  const canonical = map => Object.keys(map || {}).sort().map(id => {
+    const entry = map[id] || {};
+    return [
+      id,
+      entry.active === true,
+      entry.manual === true,
+      Number(entry.wrongCount || 0),
+      Number(entry.lastWrongAt || 0),
+      Number(entry.updatedAt || 0)
+    ];
+  });
+  return JSON.stringify(canonical(first)) === JSON.stringify(canonical(second));
+}
+
 async function mergeLocalIntoCloud(user){
   const reference = progressReference(user);
   const localCompleted = collectLocalProgress();
@@ -76,6 +111,25 @@ async function mergeLocalIntoCloud(user){
     const cloudCompleted = snapshot.exists() ? snapshot.data().completed || {} : {};
     transaction.set(reference, {
       completed: {...cloudCompleted, ...localCompleted},
+      updatedAt: serverTimestamp(),
+      schemaVersion: 1
+    });
+  });
+}
+
+async function mergeStudyIntoCloud(user){
+  const localStorageApi = studyStorage();
+  if(!localStorageApi) return;
+  const reference = studyReference(user);
+  const localItems = localStorageApi.getMap();
+
+  await runTransaction(database, async transaction => {
+    const snapshot = await transaction.get(reference);
+    const cloudItems = snapshot.exists() ? snapshot.data().weakItems || {} : {};
+    const merged = mergeStudyMaps(cloudItems, localItems);
+    if(!sameStudyMap(localItems, merged)) localStorageApi.replaceMap(merged, 'cloud');
+    transaction.set(reference, {
+      weakItems: merged,
       updatedAt: serverTimestamp(),
       schemaVersion: 1
     });
@@ -95,14 +149,27 @@ function queueCloudWrite(){
     });
 }
 
+function queueStudyWrite(){
+  if(!currentUser || !studyStorage()) return;
+
+  pendingStudyWrite = pendingStudyWrite
+    .catch(() => undefined)
+    .then(() => mergeStudyIntoCloud(currentUser))
+    .then(() => setStatus('同期済み'))
+    .catch(error => {
+      console.error('Study sync failed:', error);
+      setStatus('同期を再試行します');
+    });
+}
+
 function createSyncBar(){
   const root = document.createElement('aside');
   root.className = 'sync-bar';
-  root.setAttribute('aria-label', '学習進捗の同期');
+  root.setAttribute('aria-label', '学習記録の同期');
   root.innerHTML = `
     <div class="container sync-bar-inner">
       <div>
-        <strong>学習進捗</strong>
+        <strong>学習記録</strong>
         <span class="sync-status" id="syncStatus">この端末内に保存中</span>
         <span class="sync-user" id="syncUser"></span>
       </div>
@@ -165,10 +232,12 @@ actionButton.addEventListener('click', async () => {
 });
 
 window.addEventListener('tocfl-progress-local-change', queueCloudWrite);
+window.addEventListener('tocfl-study-local-change', queueStudyWrite);
 window.addEventListener('online', () => {
   if(currentUser){
     setStatus('同期中…');
     queueCloudWrite();
+    queueStudyWrite();
   }
 });
 window.addEventListener('offline', () => {
@@ -177,10 +246,10 @@ window.addEventListener('offline', () => {
 
 onAuthStateChanged(auth, async user => {
   currentUser = user;
-  if(stopCloudListener){
-    stopCloudListener();
-    stopCloudListener = null;
-  }
+  if(stopProgressListener) stopProgressListener();
+  if(stopStudyListener) stopStudyListener();
+  stopProgressListener = null;
+  stopStudyListener = null;
 
   if(!user){
     showSignedOut();
@@ -190,13 +259,28 @@ onAuthStateChanged(auth, async user => {
   showSignedIn(user);
   try{
     await mergeLocalIntoCloud(user);
-    stopCloudListener = onSnapshot(progressReference(user), snapshot => {
+    await mergeStudyIntoCloud(user);
+    stopProgressListener = onSnapshot(progressReference(user), snapshot => {
       if(snapshot.exists()) mergeCloudIntoLocal(snapshot.data().completed);
       setStatus(navigator.onLine ? '同期済み' : 'オフライン・端末内に保存中');
     }, error => {
       console.error('Progress listener failed:', error);
       setStatus('同期を再試行します');
     });
+    if(studyStorage()){
+      stopStudyListener = onSnapshot(studyReference(user), snapshot => {
+        if(!snapshot.exists()) return;
+        const localItems = studyStorage().getMap();
+        const cloudItems = snapshot.data().weakItems || {};
+        const merged = mergeStudyMaps(localItems, cloudItems);
+        if(!sameStudyMap(localItems, merged)) studyStorage().replaceMap(merged, 'cloud');
+        if(!sameStudyMap(cloudItems, merged)) queueStudyWrite();
+        setStatus(navigator.onLine ? '同期済み' : 'オフライン・端末内に保存中');
+      }, error => {
+        console.error('Study listener failed:', error);
+        setStatus('同期を再試行します');
+      });
+    }
   }catch(error){
     console.error('Initial progress sync failed:', error);
     setStatus('同期を再試行します');

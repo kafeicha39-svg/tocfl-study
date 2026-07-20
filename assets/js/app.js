@@ -24,6 +24,7 @@
   const todayLink = document.getElementById('todayLink');
   const bar = document.getElementById('homeProgress');
   const text = document.getElementById('progressText');
+  const weakCount = document.getElementById('homeWeakCount');
 
   if(todayTitle) todayTitle.textContent = `Day ${nextLesson.day}・${nextLesson.theme}`;
   if(todayDescription){
@@ -82,6 +83,15 @@
 
   if(bar) bar.style.width = `${completedDays.length / lessons.length * 100}%`;
   if(text) text.textContent = `${completedDays.length} / ${lessons.length}日完了`;
+  if(weakCount && window.tocflStudyStorage){
+    const activeItems = Object.values(window.tocflStudyStorage.getMap()).filter(item => item.active === true).length;
+    weakCount.textContent = `苦手 ${activeItems}語`;
+  }
 
   window.addEventListener('tocfl-progress-updated', () => location.reload());
+  window.addEventListener('tocfl-study-updated', () => {
+    if(!weakCount || !window.tocflStudyStorage) return;
+    const activeItems = Object.values(window.tocflStudyStorage.getMap()).filter(item => item.active === true).length;
+    weakCount.textContent = `苦手 ${activeItems}語`;
+  });
 })();

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d7b74">
+  <title>集中練習 | TOCFL Band B Study</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=20260719-4">
+</head>
+<body>
+<nav class="lesson-nav">
+  <div class="container">
+    <a class="back-link" href="index.html">← ホーム</a>
+    <strong>集中練習</strong>
+  </div>
+</nav>
+
+<header class="hero practice-hero">
+  <div class="container">
+    <span class="badge">PRACTICE</span>
+    <h1>覚えるための集中練習</h1>
+    <p>全Dayの単語を、書き取り・ピンイン・苦手復習・模試で定着させます。</p>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card practice-menu" aria-labelledby="practiceMenuTitle">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">SELECT MODE</span>
+        <h2 id="practiceMenuTitle">練習を選ぶ</h2>
+      </div>
+      <span class="status" id="weakCount">苦手 0語</span>
+    </div>
+    <div class="practice-tabs" role="tablist" aria-label="練習モード">
+      <button type="button" role="tab" data-mode="weak">★ 苦手復習</button>
+      <button type="button" role="tab" data-mode="pinyin">拼 ピンイン</button>
+      <button type="button" role="tab" data-mode="dictation">聽 書き取り</button>
+      <button type="button" role="tab" data-mode="mock">試 模試</button>
+    </div>
+  </section>
+
+  <div id="practiceApp"></div>
+  <p class="sr-only" id="practiceAnnouncement" aria-live="polite"></p>
+</main>
+
+<footer>TOCFL Band B 学習サポート・オリジナル補助教材</footer>
+<script src="assets/js/progress-storage.js?v=20260719-4"></script>
+<script src="assets/js/study-storage.js?v=20260719-4"></script>
+<script type="module" src="assets/js/progress-sync.js?v=20260719-4"></script>
+<script src="assets/js/course-data.js?v=20260719-4"></script>
+<script src="assets/js/speech.js?v=20260719-4"></script>
+<script src="assets/js/practice.js?v=20260719-5"></script>
+</body>
+</html>

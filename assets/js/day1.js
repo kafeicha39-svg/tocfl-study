@@ -40,9 +40,9 @@ const words = [
 ];
 
 const quizData = [
-  {q:"「向き合う・直面する」はどれ？", opts:["支持","面對","統計"], a:1},
-  {q:"「根據統計」の意味は？", opts:["統計によると","統計を支持する","統計と付き合う"], a:0},
-  {q:"「跟同事相處得很好」の意味は？", opts:["同僚を統計した","同僚とうまく付き合っている","同僚に反対した"], a:1}
+  {q:"「向き合う・直面する」はどれ？", opts:["支持","面對","統計"], a:1, w:"面對"},
+  {q:"「根據統計」の意味は？", opts:["統計によると","統計を支持する","統計と付き合う"], a:0, w:"根據"},
+  {q:"「跟同事相處得很好」の意味は？", opts:["同僚を統計した","同僚とうまく付き合っている","同僚に反対した"], a:1, w:"相處"}
 ];
 
 function speakText(text){
@@ -114,6 +114,7 @@ function answerQuiz(btn,i,j){
   const buttons = group.querySelectorAll('.choice');
   buttons.forEach(b=>b.disabled=true);
   const ok = j===quizData[i].a;
+  if(!ok) window.tocflStudyStorage?.markWrong(quizData[i].w);
   btn.classList.add(ok?'correct':'wrong');
   if(!ok) buttons[quizData[i].a].classList.add('correct');
   const answer = document.getElementById('quizAnswer'+i);

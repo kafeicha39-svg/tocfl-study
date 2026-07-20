@@ -80,6 +80,13 @@ function speakText(text){
   return window.tocflSpeech.speak(text, 0.85);
 }
 
+function markKnownWordsWrong(text){
+  const courseWords = (window.TOCFL_COURSE?.lessons || []).flatMap(lesson => lesson.words);
+  courseWords
+    .filter((word, index, items) => text.includes(word.w) && items.findIndex(item => item.w === word.w) === index)
+    .forEach(word => window.tocflStudyStorage?.markWrong(word.w));
+}
+
 function mark(key){
   if(!progressStorage.getItem(key)) progressStorage.setItem(key, '1');
   updateProgress();
@@ -161,6 +168,7 @@ function answerReview(button, index, optionIndex){
   buttons.forEach(item => item.disabled = true);
   const item = reviewData[index];
   const correct = optionIndex === item.a;
+  if(!correct) markKnownWordsWrong(item.zh);
   button.classList.add(correct ? 'correct' : 'wrong');
   if(!correct) buttons[item.a].classList.add('correct');
   const answer = document.getElementById(`reviewAnswer${index}`);
@@ -210,6 +218,7 @@ function answerQuiz(button, index, optionIndex){
   button.classList.add(correct ? 'correct' : 'wrong');
   if(!correct) buttons[item.a].classList.add('correct');
   const correctOption = item.opts[item.a];
+  if(!correct) markKnownWordsWrong(correctOption[0]);
   const answer = document.getElementById(`quizAnswer${index}`);
   answer.classList.add('show');
   answer.innerHTML = `${correct ? '○ 正解' : '正解を確認しましょう'}：<strong lang="zh-Hant">${correctOption[0]}</strong> <span class="pinyin">${correctOption[1]}</span><br><button type="button" class="speak" onclick="speakText('${correctOption[0]}')">🔊 正解を聞く</button>`;

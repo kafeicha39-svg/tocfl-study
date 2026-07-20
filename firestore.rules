@@ -20,5 +20,24 @@ service cloud.firestore {
       allow create, update: if isOwner() && isValidProgress();
       allow delete: if false;
     }
+
+    match /users/{userId}/study/{studyDoc} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isValidStudy() {
+        return studyDoc == 'current'
+          && request.resource.data.keys().hasOnly(['weakItems', 'updatedAt', 'schemaVersion'])
+          && request.resource.data.schemaVersion == 1
+          && request.resource.data.weakItems is map
+          && request.resource.data.weakItems.size() <= 500
+          && request.resource.data.updatedAt is timestamp;
+      }
+
+      allow read: if isOwner() && studyDoc == 'current';
+      allow create, update: if isOwner() && isValidStudy();
+      allow delete: if false;
+    }
   }
 }

@@ -213,6 +213,7 @@
     const question = reviewQuestions[questionIndex];
     const correctIndex = question.options.indexOf(question.word);
     const correct = optionIndex === correctIndex;
+    if(!correct) window.tocflStudyStorage?.markWrong(question.word.w);
     button.classList.add(correct ? 'correct' : 'wrong');
     if(!correct) buttons[correctIndex].classList.add('correct');
     const answer = document.getElementById(`reviewAnswer${questionIndex}`);
@@ -230,6 +231,7 @@
     buttons.forEach(item => item.disabled = true);
     const correctIndex = listeningOptions.indexOf(listeningTarget);
     const correct = optionIndex === correctIndex;
+    if(!correct) window.tocflStudyStorage?.markWrong(listeningTarget.w);
     button.classList.add(correct ? 'correct' : 'wrong');
     if(!correct) buttons[correctIndex].classList.add('correct');
     const answer = document.getElementById('listeningAnswer');
@@ -247,6 +249,7 @@
     const question = quizQuestions[questionIndex];
     const correctIndex = question.options.indexOf(question.word);
     const correct = optionIndex === correctIndex;
+    if(!correct) window.tocflStudyStorage?.markWrong(question.word.w);
     button.classList.add(correct ? 'correct' : 'wrong');
     if(!correct) buttons[correctIndex].classList.add('correct');
     const answer = document.getElementById(`quizAnswer${questionIndex}`);
