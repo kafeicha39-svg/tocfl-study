@@ -1,8 +1,10 @@
 (function(){
   const progressStorage = window.tocflProgressStorage || localStorage;
   const lessons = window.TOCFL_COURSE?.lessons || [];
+  const readings = window.TOCFL_READINGS || [];
   const requestedDay = Number(document.body.dataset.day || new URLSearchParams(location.search).get('day'));
   const lesson = lessons.find(item => item.day === requestedDay);
+  const reading = readings.find(item => item.day === requestedDay);
   const previousLesson = lessons.find(item => item.day === requestedDay - 1);
   const nextLesson = lessons.find(item => item.day === requestedDay + 1);
 
@@ -13,7 +15,7 @@
     return `course.html?day=${day}`;
   };
 
-  if(!lesson || requestedDay < 3){
+  if(!lesson || !reading || requestedDay < 3){
     document.title = '教材が見つかりません | TOCFL Band B Study';
     document.getElementById('lessonApp').innerHTML = `
       <section class="card">
@@ -27,7 +29,7 @@
   document.title = `Day ${lesson.day} | TOCFL Band B Study`;
   document.getElementById('lessonLabel').textContent = `Day ${lesson.day}`;
   document.getElementById('unitBadge').textContent = `Unit ${lesson.unit}・Day ${lesson.day}`;
-  document.getElementById('heroTitle').textContent = `今日の${lesson.words.length + 14}分TOCFL`;
+  document.getElementById('heroTitle').textContent = `今日の${lesson.words.length + 22}分TOCFL`;
   document.getElementById('heroTheme').textContent = `テーマ：${lesson.theme}`;
 
   const previousLink = document.getElementById('previousLink');
@@ -40,6 +42,8 @@
 
   const key = (type, index = '') => `tocfl_course_v2_day${lesson.day}_${type}${index}`;
   const completeKey = `tocfl_course_v2_day${lesson.day}_complete`;
+  const readingQuestionKey = index => `tocfl_reading_v1_day${lesson.day}_q_${index}`;
+  const readingCompleteKey = `tocfl_reading_v1_day${lesson.day}_complete`;
   const totalSteps = lesson.words.length + 3;
 
   document.getElementById('lessonApp').innerHTML = `
@@ -49,9 +53,10 @@
         <div><strong>① 前日の復習</strong><br>3分</div>
         <div><strong>② 新しい単語${lesson.words.length}語</strong><br>${lesson.words.length + 4}分</div>
         <div><strong>③ 聞き取り</strong><br>3分</div>
-        <div><strong>④ 仕上げクイズ</strong><br>4分</div>
+        <div><strong>④ 読解練習</strong><br>8分</div>
+        <div><strong>⑤ 仕上げクイズ</strong><br>4分</div>
       </div>
-      <div class="progress" aria-label="Day ${lesson.day}の学習進捗"><span id="lessonProgress"></span></div>
+      <div class="progress" aria-label="Day ${lesson.day}の単語・復習進捗"><span id="lessonProgress"></span></div>
       <p class="muted" id="lessonProgressText">進捗：0 / ${totalSteps}</p>
       <p class="source-note">参考範囲：${lesson.source} の単語一覧。意味・問題構成は学習用に独自作成しています。</p>
     </section>
@@ -71,6 +76,38 @@
       <p>${lesson.words.length}語を続けて聞き、2番目に読まれた単語を選びましょう。</p>
       <button type="button" class="speak listening-button" onclick="playWordSequence()">🔊 ${lesson.words.length}語を聞く</button>
       <div id="listeningQuiz"></div>
+    </section>
+
+    <section class="card reading-card" aria-labelledby="readingTitle">
+      <span class="eyebrow">READING</span>
+      <div class="section-head reading-heading">
+        <div>
+          <h2 id="readingTitle" lang="zh-Hant">${escapeHtml(reading.title)}</h2>
+          <p>まず本文だけで読み、必要なときに補助を開きましょう。</p>
+        </div>
+        <span class="status" id="readingProgress" aria-live="polite">読解 0 / ${reading.questions.length}問</span>
+      </div>
+      <div class="reading-passage">
+        <p id="readingText" lang="zh-TW">${escapeHtml(reading.text)}</p>
+        <button type="button" class="speak" onclick="playReading()" aria-label="台湾華語で読解文を再生する">🔊 読解文を聞く</button>
+      </div>
+      <details class="reading-support">
+        <summary>補助を見る（ピンイン・日本語訳）</summary>
+        <div class="reading-support-content">
+          <p class="pinyin" lang="zh-Latn"><strong>ピンイン</strong><br>${escapeHtml(reading.pinyin)}</p>
+          <p class="jp"><strong>日本語訳</strong><br>${escapeHtml(reading.translation)}</p>
+        </div>
+      </details>
+      <div class="reading-vocabulary" aria-label="本文で使う新出単語">
+        <strong>単語カードで確認：</strong>
+        ${reading.focusWords.map(word => {
+          const index = lesson.words.findIndex(item => item.w === word);
+          return index >= 0
+            ? `<a class="chip vocabulary-link" href="#wordCard${index}" lang="zh-Hant">${escapeHtml(word)}</a>`
+            : `<span class="chip" lang="zh-Hant">${escapeHtml(word)}</span>`;
+        }).join('')}
+      </div>
+      <div id="readingQuiz"></div>
     </section>
 
     <section class="card">
@@ -96,6 +133,15 @@
 
   function speakText(text, rate = 0.84){
     return window.tocflSpeech.speak(text, rate);
+  }
+
+  function escapeHtml(value){
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 
   function mark(type, index = ''){
@@ -176,6 +222,57 @@
       <div class="answer" id="listeningAnswer"></div>`;
   }
 
+  function readingAnsweredCount(){
+    return reading.questions.filter((_, index) => progressStorage.getItem(readingQuestionKey(index)) === '1').length;
+  }
+
+  function updateReadingProgress(){
+    const count = readingAnsweredCount();
+    const progress = document.getElementById('readingProgress');
+    if(progress){
+      progress.textContent = count === reading.questions.length
+        ? `読解 ${count} / ${reading.questions.length}問 完了`
+        : `読解 ${count} / ${reading.questions.length}問`;
+      progress.classList.toggle('done', count === reading.questions.length);
+    }
+  }
+
+  function renderReading(){
+    document.getElementById('readingQuiz').innerHTML = reading.questions.map((question, questionIndex) => `
+      <div class="quiz-block reading-question" id="readingBlock${questionIndex}" role="group" aria-labelledby="readingQuestion${questionIndex}">
+        <h3 id="readingQuestion${questionIndex}" lang="zh-Hant">Q${questionIndex + 1}. ${escapeHtml(question.prompt)}</h3>
+        <div class="reading-options">
+          ${question.options.map((option, optionIndex) => `
+            <button type="button" class="choice" onclick="answerReading(this, ${questionIndex}, ${optionIndex})" aria-label="選択肢 ${String.fromCharCode(65 + optionIndex)}、${escapeHtml(option)}">
+              <span aria-hidden="true">${String.fromCharCode(65 + optionIndex)}.</span> <span lang="zh-Hant">${escapeHtml(option)}</span>
+            </button>`).join('')}
+        </div>
+        <div class="answer reading-answer" id="readingAnswer${questionIndex}" role="status" aria-live="polite"></div>
+      </div>`).join('');
+  }
+
+  function updateReadingWeakButton(button, word){
+    const active = window.tocflStudyStorage?.isWeak(word) === true;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+    button.textContent = active ? `★「${word}」を苦手から解除` : `☆「${word}」を苦手に追加`;
+  }
+
+  function appendReadingWeakButton(answer, word){
+    if(!word || !window.tocflStudyStorage) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'weak-toggle reading-weak-toggle';
+    button.dataset.word = word;
+    button.addEventListener('click', () => {
+      if(window.tocflStudyStorage.isWeak(word)) window.tocflStudyStorage.resolve(word);
+      else window.tocflStudyStorage.addManual(word);
+      updateReadingWeakButton(button, word);
+    });
+    updateReadingWeakButton(button, word);
+    answer.appendChild(button);
+  }
+
   const quizQuestions = lesson.words.map((word, index) => ({
     word,
     options: makeOptions(lesson.words, index)
@@ -202,6 +299,10 @@
 
   window.playWordSequence = function(){
     speakText(lesson.words.map(item => item.w).join('。'), 0.76);
+  };
+
+  window.playReading = function(){
+    speakText(reading.text, 0.82);
   };
 
   window.answerReview = function(button, questionIndex, optionIndex){
@@ -240,6 +341,32 @@
     mark('listening');
   };
 
+  window.answerReading = function(button, questionIndex, optionIndex){
+    const block = document.getElementById(`readingBlock${questionIndex}`);
+    if(block.dataset.done) return;
+    block.dataset.done = '1';
+    const buttons = block.querySelectorAll('.choice');
+    buttons.forEach(item => item.disabled = true);
+    const question = reading.questions[questionIndex];
+    const correct = optionIndex === question.answer;
+    button.classList.add(correct ? 'correct' : 'wrong');
+    if(!correct) buttons[question.answer].classList.add('correct');
+
+    const answer = document.getElementById(`readingAnswer${questionIndex}`);
+    answer.classList.add('show');
+    answer.innerHTML = `
+      <p class="reading-result"><strong>${correct ? '○ 正解です。' : `正解は${String.fromCharCode(65 + question.answer)}です。`}</strong></p>
+      <p>${escapeHtml(question.explanation)}</p>
+      <blockquote class="reading-evidence" lang="zh-Hant"><strong>本文の根拠：</strong><br>${escapeHtml(question.evidence)}</blockquote>`;
+    if(!correct) appendReadingWeakButton(answer, question.word);
+
+    progressStorage.setItem(readingQuestionKey(questionIndex), '1');
+    if(readingAnsweredCount() === reading.questions.length){
+      progressStorage.setItem(readingCompleteKey, '1');
+    }
+    updateReadingProgress();
+  };
+
   window.answerQuiz = function(button, questionIndex, optionIndex){
     const block = document.getElementById(`quizBlock${questionIndex}`);
     if(block.dataset.done) return;
@@ -267,8 +394,10 @@
   renderReview();
   renderWords();
   renderListening();
+  renderReading();
   renderQuiz();
   updateProgress();
+  updateReadingProgress();
   if(progressStorage.getItem(completeKey)){
     document.getElementById('completeMessage').textContent = `○ Day ${lesson.day}は完了済みです。`;
   }
