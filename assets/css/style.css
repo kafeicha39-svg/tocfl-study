@@ -685,7 +685,8 @@ footer{text-align:center;color:var(--muted);padding:10px 16px 28px}
   .examples-controls{grid-template-columns:1fr}
   .examples-toolbar-heading{display:grid}
   .examples-toolbar-heading .status{max-width:100%;width:max-content}
-  .example-day-heading{align-items:flex-start}
+  .example-day-heading{display:grid;align-items:flex-start;gap:8px}
+  .example-day-heading .text-link{width:max-content;white-space:nowrap}
   .example-word-heading{display:grid;gap:8px}
   .example-meaning{max-width:100%;width:max-content;margin:0;text-align:left}
   .example-sentence{padding:14px}

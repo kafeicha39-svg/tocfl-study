@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import crypto from 'node:crypto';
 
 const root = path.resolve(import.meta.dirname, '..');
 
@@ -60,15 +61,67 @@ vm.createContext(exampleContext);
 vm.runInContext(read('assets/js/example-data.js'), exampleContext);
 const exampleDays = exampleContext.window.TOCFL_EXAMPLES;
 assert(Array.isArray(exampleDays), '例文データが配列ではありません。');
+assert(exampleDays.length === 31, '例文データがDay 1〜31の31日分ではありません。');
+assert(exampleDays.every((item, index) => item.day === index + 1), '例文データのDay 1〜31が連続していません。');
+
+const toneMarkPattern = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i;
+const simplifiedPattern = /[这发后为个么还国门开当术画进会长实学间现让听说与万岁历医达过对无将书广气边东车号网台]/;
+
+exampleDays.forEach(exampleDay => {
+  const lesson = lessons.find(item => item.day === exampleDay.day);
+  assert(lesson, `Day ${exampleDay.day}に対応するコースデータがありません。`);
+  assert(exampleDay.theme === lesson.theme, `Day ${exampleDay.day}のテーマがコースデータと一致しません。`);
+  assert(exampleDay.words.length === lesson.words.length, `Day ${exampleDay.day}の単語数がコースデータと一致しません。`);
+
+  exampleDay.words.forEach((exampleWord, index) => {
+    const courseWord = lesson.words[index];
+    assert(exampleWord.word === courseWord.w, `Day ${exampleDay.day}の単語「${exampleWord.word}」がコースデータの語順と一致しません。`);
+    assert(exampleWord.pinyin === courseWord.p, `Day ${exampleDay.day}「${exampleWord.word}」のピンインがコースデータと一致しません。`);
+    const isPreservedDay3Meaning = exampleDay.day === 3
+      && exampleWord.word === '互助'
+      && exampleWord.meaning === '助け合い・相互扶助'
+      && courseWord.m === '助け合う・相互扶助';
+    assert(exampleWord.meaning === courseWord.m || isPreservedDay3Meaning, `Day ${exampleDay.day}「${exampleWord.word}」の意味がコースデータと一致しません。`);
+    assert(exampleWord.word && exampleWord.pinyin && exampleWord.meaning && exampleWord.note, `Day ${exampleDay.day}「${exampleWord.word}」の単語・ピンイン・意味・使い方メモが不足しています。`);
+    assert(toneMarkPattern.test(exampleWord.pinyin), `Day ${exampleDay.day}「${exampleWord.word}」のピンインに声調記号がありません。`);
+    assert(exampleWord.examples.length === 2, `Day ${exampleDay.day}「${exampleWord.word}」の例文が2件ではありません。`);
+    exampleWord.examples.forEach((example, exampleIndex) => {
+      assert(example.chinese && example.pinyin && example.japanese, `Day ${exampleDay.day}「${exampleWord.word}」例文${exampleIndex + 1}の中文・ピンイン・日本語訳が不足しています。`);
+      assert(example.chinese.includes(exampleWord.word), `Day ${exampleDay.day}「${exampleWord.word}」例文${exampleIndex + 1}に対象単語がありません。`);
+      assert(toneMarkPattern.test(example.pinyin), `Day ${exampleDay.day}「${exampleWord.word}」例文${exampleIndex + 1}のピンインに声調記号がありません。`);
+      assert(!simplifiedPattern.test(example.chinese), `Day ${exampleDay.day}「${exampleWord.word}」例文${exampleIndex + 1}に簡体字が含まれています。`);
+    });
+  });
+
+  assert(exampleDay.summaryExamples.length === 2, `Day ${exampleDay.day}のまとめ例文が2件ではありません。`);
+  exampleDay.summaryExamples.forEach((example, index) => {
+    assert(example.chinese && example.pinyin && example.japanese, `Day ${exampleDay.day}まとめ例文${index + 1}の中文・ピンイン・日本語訳が不足しています。`);
+    assert(toneMarkPattern.test(example.pinyin), `Day ${exampleDay.day}まとめ例文${index + 1}のピンインに声調記号がありません。`);
+    assert(!simplifiedPattern.test(example.chinese), `Day ${exampleDay.day}まとめ例文${index + 1}に簡体字が含まれています。`);
+    const usedWords = exampleDay.words.filter(item => example.chinese.includes(item.word));
+    assert(usedWords.length >= 2, `Day ${exampleDay.day}まとめ例文${index + 1}で複数の対象単語が使われていません。`);
+  });
+});
+
 const day3Examples = exampleDays.find(item => item.day === 3);
 assert(day3Examples?.theme === '協力と判断', 'Day 3の例文テーマが不正です。');
 assert(day3Examples.words.length === 5, 'Day 3の例文単語が5語ではありません。');
-assert(day3Examples.words.every(word => word.word && word.pinyin && word.meaning && word.note), '例文単語データに不足があります。');
-assert(day3Examples.words.every(word => word.examples.length === 2), '各単語の例文が2件ではありません。');
-assert(day3Examples.words.every(word => word.examples.every(example => example.chinese && example.pinyin && example.japanese)), '中文・ピンイン・日本語訳に不足があります。');
-assert(day3Examples.summaryExamples.length === 2, 'Day 3のまとめ例文が2件ではありません。');
 assert(['順利','恰當','依據','協調','互助'].every(word => day3Examples.words.some(item => item.word === word)), 'Day 3の対象単語が不足しています。');
+const day3Fingerprint = crypto.createHash('sha256').update(JSON.stringify(day3Examples)).digest('hex');
+assert(day3Fingerprint === '30f4e2216fbe3e7a7017de255b40eca63169c97841e44870831feecb41da0b26', '公開済みのDay 3例文データが変更されています。');
 new vm.Script(read('assets/js/example-data.js'), {filename: 'example-data.js'});
+
+const examplePage = read('examples/index.html');
+assert(examplePage.includes('...data.map(day =>'), 'Dayフィルターが全例文データから自動生成されていません。');
+assert(examplePage.includes('item.word') && examplePage.includes('item.meaning') && examplePage.includes('example.chinese'), '単語・意味・例文の検索対象が不足しています。');
+assert(examplePage.includes('setTranslationVisibility') && examplePage.includes('tocfl_examples_translation'), '日本語訳の表示切替がありません。');
+assert(examplePage.includes("['normal', 'large', 'xlarge']") && examplePage.includes('tocfl_examples_size'), '文字サイズの3段階切替がありません。');
+assert(examplePage.includes('`../lessons/course.html?day=${day}`'), 'Day 4〜31から共用レッスン画面へ戻るリンクがありません。');
+assert(read('lessons/day1.html').includes('../examples/?day=1'), 'Day 1から例文集へのリンクがありません。');
+assert(read('lessons/day2.html').includes('../examples/?day=2'), 'Day 2から例文集へのリンクがありません。');
+assert(read('lessons/day3.html').includes('../examples/?day=3'), 'Day 3から例文集へのリンクがありません。');
+assert(read('lessons/course.html').includes('id="lessonExampleLink"'), 'Day 4〜31から例文集へのリンクがありません。');
+assert(read('assets/js/course-lesson.js').includes("`../examples/?day=${lesson.day}`"), 'Day 4〜31の例文リンクが選択中のDayと連動していません。');
 
 const htmlFiles = [
   'index.html',
@@ -82,7 +135,7 @@ for(const htmlFile of htmlFiles){
   const html = read(htmlFile);
   for(const match of html.matchAll(/(?:src|href)="([^"]+)"/g)){
     const reference = match[1].split(/[?#]/)[0];
-    if(!reference || /^(https?:|mailto:)/.test(reference)) continue;
+    if(!reference || reference.includes('${') || /^(https?:|mailto:)/.test(reference)) continue;
     const target = path.resolve(root, path.dirname(htmlFile), reference);
     assert(fs.existsSync(target), `${htmlFile} の参照先 ${reference} がありません。`);
   }

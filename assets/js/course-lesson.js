@@ -31,6 +31,7 @@
   document.getElementById('unitBadge').textContent = `Unit ${lesson.unit}・Day ${lesson.day}`;
   document.getElementById('heroTitle').textContent = `今日の${lesson.words.length + 22}分TOCFL`;
   document.getElementById('heroTheme').textContent = `テーマ：${lesson.theme}`;
+  document.getElementById('lessonExampleLink').href = `../examples/?day=${lesson.day}`;
 
   const previousLink = document.getElementById('previousLink');
   if(previousLesson){
